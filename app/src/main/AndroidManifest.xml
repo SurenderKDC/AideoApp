@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.aideo.app" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Aideo"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ViewPager2WithExoplayer"
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:allowBackup">
+        <activity
+            android:name="com.aideo.app.HemePlayerScreen"
+            android:exported="false" />
+        <activity
+            android:name="com.aideo.app.SplashScreen"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.aideo.app.FeedBackActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.aideo.app.ContentCreators"
+            android:exported="false" />
+        <activity
+            android:name="com.aideo.app.PrivacyPolicy"
+            android:exported="false" />
+        <activity
+            android:name="com.aideo.app.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.aideo.app.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.aideo.app.HomeScreen"
+            android:exported="true" />
+        <activity
+            android:name="com.aideo.app.SecondActivity"
+            android:exported="true" />
+
+        <activity
+            android:exported="true"
+            android:name=".VideoTrimmer.VideoTrimmerActivity">
+        </activity>
+
+        <activity
+            android:name=".ImageEditor.EditImageActivity"
+            android:exported="true">
+
+        </activity>
+
+        <activity
+            android:name="com.aideo.app.MainActivity"
+            android:launchMode="singleTop"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                tools:targetApi="m" >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="cmsbe.aideo.in" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.aideo.yourapp.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+
+    <meta-data
+        android:name="preloaded_fonts"
+        android:resource="@array/preloaded_fonts" />
+
+</manifest>

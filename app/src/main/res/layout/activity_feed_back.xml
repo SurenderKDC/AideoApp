@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".PrivacyPolicy">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/back_button"
+            android:background="@drawable/back_button"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="15dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:textFontWeight="800"
+                android:textSize="20dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Feedback"
+                android:layout_marginTop="80dp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Welcome to Aideo..!"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="We're thrilled to have you as a part of our growing community of users. Your experience and feedback are invaluable to us as we work tirelessly to make Aideo the best it can be."
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="We Want to Hear from You..! \n
+At Aideo, we believe that your voice matters. We're committed to creating an experience that suits your needs and exceeds your expectations. Your feedback is essential in helping us achieve this goal.
+"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="What we're Interested In: "
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="7dp"
+                    android:textColor="@color/white"
+                    android:text="●"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="Your thoughts on the user interface – is it user-friendly and intuitive?"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="7dp"
+                    android:textColor="@color/white"
+                    android:text="●"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="Suggestions for new features or improvements to existing ones."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="7dp"
+                    android:textColor="@color/white"
+                    android:text="●"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="Any content you'd like to see more of or specific topics you're interested in."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="7dp"
+                    android:textColor="@color/white"
+                    android:text="●"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="Reports of any bugs or glitches you come across."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="7dp"
+                    android:textColor="@color/white"
+                    android:text="●"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="Ideas for personalization options that would enhance your experience."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="7dp"
+                    android:textColor="@color/white"
+                    android:text="●"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textFontWeight="400"
+                    android:textSize="15dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="General comments, praises, or criticisms – we value it all..!"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="We will do all that we can to follow your feedback and improve our future releases and content."
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Your feedback plays a crucial role in shaping our future. Together, we'll make it even better..!"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+
+            <RelativeLayout
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_width="match_parent"
+                android:padding="3dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/ic_light_grey_5_rounded_corner_back">
+
+                <EditText
+                    android:padding="10dp"
+                    android:background="@drawable/edittext_no_bottom_line"
+                    android:id="@+id/et_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:textSize="18dp"
+                    android:hint="Your feedback here.."
+                    android:textColorHint="@color/color_light_grey"
+                    android:textColor="@color/color_light_grey"
+                    android:inputType="textMultiLine"
+                    android:minLines="2"
+                    android:gravity="top|start"
+                    android:maxLines="10"/>
+
+
+                <TextView
+                    android:id="@+id/submit"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
+                    android:textFontWeight="800"
+                    android:textSize="22dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="25dp"
+                    android:textColor="@color/white"
+                    android:text="Submit"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            </RelativeLayout>
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Thank you for choosing Aideo. Happy exploring!"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Sincerely,"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginBottom="20dp"
+                android:textColor="@color/white"
+                android:text="Team Aideo"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</ScrollView>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/black"
+    tools:context=".HomeScreen">
+
+    <TextView
+        android:id="@+id/back_button"
+        android:background="@drawable/back_button"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="15dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"/>
+
+    <TextView
+        android:fontFamily="@font/quicksand_regular"
+        android:textFontWeight="700"
+        android:textSize="30dp"
+        android:layout_marginLeft="60dp"
+        android:textColor="#800080"
+        android:text="aideo"
+        android:layout_marginTop="13dp"
+        android:layout_width="100dp"
+        android:layout_height="40dp"/>
+
+
+    <TextView
+        android:id="@+id/settings"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/settings"
+        android:backgroundTint="@color/white"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="10dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_marginTop="40dp"
+        android:id="@+id/outerRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp" />
+
+</RelativeLayout>

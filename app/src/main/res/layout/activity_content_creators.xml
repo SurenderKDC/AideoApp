@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".PrivacyPolicy">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <TextView
+            android:id="@+id/back_button"
+            android:background="@drawable/back_button"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="15dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:textFontWeight="800"
+                android:textSize="20dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Content Creators"
+                android:layout_marginTop="80dp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Calling All Indian Content Creators and Culture Enthusiasts..!"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Greetings from Aideo"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Are you passionate about Indian culture, customs, food, travel, religion, and all things that make India a rich tapestry of traditions and stories? We're reaching out to you because we believe your expertise is invaluable, and we have an exciting opportunity for creators like you."
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Aideo is dedicated to celebrating and showcasing the vibrant essence of Indian culture. We are in the process of crafting a platform that will be the ultimate stage for content creators who specialize in Indian topics. We're building an ecosystem where your unique insights, stories, and creations will shine brightly. At Aideo, we're not just building a platform; we're nurturing a cultural movement. We invite you to be a part of this journey and help us bring the beauty of India to the world."
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Simply express your interest by contacting us at join@aideo.in with a brief introduction and links to your previous works done. We’ll get back to you as soon as we can."
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:textFontWeight="400"
+                android:textSize="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:textColor="@color/white"
+                android:text="Let's Celebrate India Together."
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</ScrollView>
