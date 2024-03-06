@@ -9,11 +9,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.aideo.app.ApiCalling.ContentData
 import com.aideo.app.R
+import com.aideo.app.videos
 import java.lang.Exception
 import java.util.ArrayList
 
 
-class StatusAdapter(var videos: ArrayList<ContentData>,var adapterPosition : Int, private val width : Int) : RecyclerView.Adapter<StatusAdapter.ViewHolder>()
+class StatusAdapter(var statusVideo: ArrayList<Int>,var adapterPosition : Int, private val width : Int) : RecyclerView.Adapter<StatusAdapter.ViewHolder>()
 {
     var currentPosition : Int = 0
     var widthData : Double = 0.0

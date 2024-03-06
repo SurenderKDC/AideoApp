@@ -12,18 +12,26 @@ import com.aideo.app.databinding.ListVideoBinding
 
 class VideoAdapter(
     var context: Context,
-    var videos: ArrayList<ContentData>,
+    var videos: ArrayList<Int>,
     private val itemClickListener: ClickFunctionality
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
+    private var textValue: String = ""
 
     class VideoViewHolder(
         val binding: ListVideoBinding,
         var context: Context,
+
     )
         : RecyclerView.ViewHolder(binding.root)
     {
         var simpleVideoView: VideoView? = null
     }
+
+    fun updateTextValue(newValue: String) {
+        textValue = newValue
+        notifyDataSetChanged()
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
         val view = ListVideoBinding.inflate(LayoutInflater.from(context), parent, false)
@@ -37,13 +45,11 @@ class VideoAdapter(
 
         try
         {
-            holder.binding.tvTitle.text = model.title
+            holder.binding.tvTitle.text = "$textValue"
             holder.binding.imageView.visibility = View.GONE
         }
         catch (e : Exception){
         }
-
-
 
         holder.binding.leftTap.setOnClickListener{
             itemClickListener.clickOnLeftSide()
@@ -53,8 +59,6 @@ class VideoAdapter(
         holder.binding.rightTap.setOnClickListener{
             itemClickListener.clickOnRightSide()
         }
-
-
     }
 
     override fun getItemCount(): Int {

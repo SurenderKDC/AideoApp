@@ -26,7 +26,8 @@ data class ContentData(
     val title: String?,
     val description: String?,
     val tagsData: List<Tag>?,
-    var callToAction : String?
+    var callToAction : String?,
+    var isSecurityEnabled : Boolean = false
     )
 
 data class Background(val video: Video?, val audio: Audio?,val image:Image?,var exoplayerUrlPosition :Int?)

@@ -64,7 +64,11 @@
         <activity
             android:name=".ImageEditor.EditImageActivity"
             android:exported="true">
+        </activity>
 
+        <activity
+            android:exported="true"
+            android:name=".AideoCreatorToolDev.AideoCreatorTool">
         </activity>
 
         <activity
