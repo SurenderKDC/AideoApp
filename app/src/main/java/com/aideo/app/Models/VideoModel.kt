@@ -27,10 +27,10 @@ data class ContentData(
     val description: String?,
     val tagsData: List<Tag>?,
     var callToAction : String?,
-    var isSecurityEnabled : Boolean = false
+    var privateType : Boolean?
     )
 
-data class Background(val video: Video?, val audio: Audio?,val image:Image?,var exoplayerUrlPosition :Int?)
+data class Background(val video: Video?, val audio: Audio?,val image:Image?,var exoplayerUrlPosition :Int?,var forNextUrlPosition : Int?)
 
 data class Video(val source: String?)
 
@@ -51,9 +51,6 @@ data class PlaylistData(
     val createdDate: String?,
     val creatorId: Creator?,
     val description: String?,
-    val story: List<Story>?,
-    val visual: List<Visual>?,
-    val audio: List<Audio>?,
     val completeProject: List<CompleteProject>?,
     val allocated: List<Allocated>?,
     val liveStatus: String?,
@@ -64,7 +61,8 @@ data class PlaylistData(
     val disabledDate: String?,
     val liveDate: String?,
     val watchDuration: Int?,
-    var callToAction : String?
+    var callToAction : String?,
+    var privateType : Boolean?
 )
 
 

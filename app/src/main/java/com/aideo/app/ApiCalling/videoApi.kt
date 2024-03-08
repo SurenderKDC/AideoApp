@@ -4,8 +4,9 @@ import com.google.gson.JsonElement
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface VideoContentsApi {
-    @GET("mobile/content/place/{id}?page=1&perPage=2")
-    fun getVideoContentsTopic(@Path("id") id: String): Call<JsonElement>
+    @GET("mobile/content/place/{id}")
+    fun getVideoContentsTopic(@Path("id") id: String, @Query("no") page: Int): Call<JsonElement>
 }

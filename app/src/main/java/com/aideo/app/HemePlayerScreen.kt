@@ -1,16 +1,9 @@
 package com.aideo.app
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.location.Geocoder
-import android.location.Location
-import android.location.LocationManager
 import android.location.LocationRequest
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
@@ -21,7 +14,6 @@ import android.os.CountDownTimer
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.text.InputType
 import android.util.Log
 import android.view.MotionEvent
@@ -32,7 +24,6 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,7 +34,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
 import com.aideo.app.Adapters.ClickFunctionality
 import com.aideo.app.Adapters.StatusAdapter
 import com.aideo.app.Adapters.VideoAdapter
@@ -53,7 +43,6 @@ import com.aideo.app.ApiCalling.ContentData
 import com.aideo.app.ApiCalling.Image
 import com.aideo.app.ApiCalling.PlaylistData
 import com.aideo.app.ApiCalling.PrefsVideoResponse
-import com.aideo.app.ApiCalling.ReloadApiCall
 import com.aideo.app.ApiCalling.Segment
 import com.aideo.app.ApiCalling.SingleVideoCallApiWithId
 import com.aideo.app.ApiCalling.Video
@@ -74,9 +63,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.malkinfo.viewpager2.ZoomOutPageTransformer
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -90,8 +77,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
@@ -122,7 +107,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     var mediaSourceCantat : ConcatenatingMediaSource? = null
 
-    var imageLoaded : Int = 0
+    var imageLoaded : Int = 1
 
     private var locationRequest: LocationRequest? = null
     private var locationCallback: LocationCallback? = null
@@ -146,6 +131,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
     var viewPagerList = ArrayList<Int>()
 
     var isUpdateVidoes = 0
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -232,17 +219,17 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
             hideKeyboard()
 
-            if(binding.editTextPassword.text.toString() == "123456")
+            if(binding.editTextPassword.text.toString() == "12345")
             {
                 binding.editTextPassword.setText("")
-                videos[adapterPosition].isSecurityEnabled = false
+                videos[adapterPosition].privateType = false
                 loadNewPage(adapterPosition)
             }
             else
             {
                 binding.editTextPassword.setText("")
 
-                Toast.makeText(this@HemePlayerScreen, "Please Enter Valid Password", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@HemePlayerScreen, "Please Enter a Valid Password", Toast.LENGTH_LONG).show()
             }
 
 
@@ -300,20 +287,12 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             true // Return true to indicate that the touch event is consumed
         }
 
-
-
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
-        // we used the postDelayed(Runnable, time) method
-        // to send a message with a delayed time.
-        //Normal Handler is deprecated , so we have to change the code little bit
-
-
         var splash = findViewById<ConstraintLayout>(R.id.splash_screen)
-
 
         if(GlobleSplash == 1)
         {
@@ -330,7 +309,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
         videos.clear()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://cmsbe.aideo.in/api/v1/")
+            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -416,12 +395,13 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                     video = videoSource,
                                     audio = audioSource,
                                     image = imageSource,
-                                    exoplayerUrlPosition = 0
+                                    exoplayerUrlPosition = 0,
+                                    forNextUrlPosition = 0
                                 )
 
                                 if(playlistData.liveStatus != "Disabled")
                                 {
-                                    var contentData = ContentData(version = 1, currentIndex = 0, background = background, segments = segments, id = playlistData._id, title = playlistData.title, description = playlistData.description, thumbnail = baseUrlForImage + "" +playlistData.thumbnail, tagsData = playlistData.tags, callToAction = playlistData.callToAction)
+                                    var contentData = ContentData(version = 1, currentIndex = 0, background = background, segments = segments, id = playlistData._id, title = playlistData.title, description = playlistData.description, thumbnail = baseUrlForImage + "" +playlistData.thumbnail, tagsData = playlistData.tags, callToAction = playlistData.callToAction, privateType = playlistData.privateType)
                                     videos.add(0,contentData)
                                 }
                             }
@@ -458,14 +438,14 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://cmsbe.aideo.in/api/v1/")
+            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
 
 
         val api = retrofit.create(VideoContentsApi::class.java)
-        val call = api.getVideoContentsTopic(cityName)
+        val call = api.getVideoContentsTopic(cityName, reloadApiCount)
 
         Log.e("Api suri start", "suri rathore")
 
@@ -580,7 +560,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                             video = videoSource,
                                             audio = audioSource,
                                             image = imageSource,
-                                            exoplayerUrlPosition = 0
+                                            exoplayerUrlPosition = 0,
+                                            forNextUrlPosition = 0
                                         )
 
                                         if (data.liveStatus != "Disabled") {
@@ -594,7 +575,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                                 description = data.description,
                                                 thumbnail = baseUrlForImage + "" + data.thumbnail,
                                                 tagsData = data.tags,
-                                                callToAction = data.callToAction
+                                                callToAction = data.callToAction,
+                                                privateType = data.privateType
                                             )
                                             videos.add(contentData)
                                         }
@@ -640,6 +622,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     fun getReloadContent(cityName : String) : ArrayList<ContentData> {
 
+        reloadApiCount = reloadApiCount + 1
+
         val timeoutInSeconds = 30L // Adjust this value as needed
 
         val okHttpClient = OkHttpClient.Builder()
@@ -650,14 +634,14 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://cmsbe.aideo.in/api/v1/")
+            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
 
 
         val api = retrofit.create(VideoContentsApi::class.java)
-        val call = api.getVideoContentsTopic(cityName)
+        val call = api.getVideoContentsTopic(cityName, reloadApiCount)
 
         Log.e("Api suri start", "suri rathore")
 
@@ -772,7 +756,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                             video = videoSource,
                                             audio = audioSource,
                                             image = imageSource,
-                                            exoplayerUrlPosition = 0
+                                            exoplayerUrlPosition = 0,
+                                            forNextUrlPosition = 0
                                         )
 
                                         if (data.liveStatus != "Disabled") {
@@ -786,7 +771,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                                 description = data.description,
                                                 thumbnail = baseUrlForImage + "" + data.thumbnail,
                                                 tagsData = data.tags,
-                                                callToAction = data.callToAction
+                                                callToAction = data.callToAction,
+                                                privateType = data.privateType
                                             )
                                             videos.add(contentData)
                                         }
@@ -844,8 +830,6 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             ) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels)
 
-                Log.d("onPageScrolled","${position}")
-
                 if(imageLoaded == 0)
                 {
                     imageLoaded = 1
@@ -869,7 +853,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     fun callLogsApi(contentId : String, city : String, tagIds : List<String>, watchDuration : String) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://cmsbe.aideo.in/api/v1/")
+            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -907,22 +891,21 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
         val dataSourceFactory = DefaultDataSourceFactory(this, "your_user_agent")
 
-        for (videoUrl in videoUrls)
+        for (currPosition in 0..(videoUrls.size - 1))
         {
-
             // Background Video
 
-            if(firstVideo == 0 && videoUrl.background?.video?.source == null)
+            if(firstVideo == 0 && videoUrls[currPosition].background?.video?.source == null)
             {
                 firstVideo = 1
-                val mediaItem = MediaItem.fromUri("https://cmsbe.aideo.in/controllers/Content/uploads/64c4eec976feff29b693a7c5/1.mp4")
+                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/64c4eec976feff29b693a7c5/1.mp4")
                 val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
                 mediaSourceCantat?.addMediaSource(mediaSourceItem)
             }
             else
             {
-                val mediaItem = MediaItem.fromUri("${videoUrl.background?.video?.source}")
+                val mediaItem = MediaItem.fromUri("${videoUrls[currPosition].background?.video?.source}")
                 val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
                 mediaSourceCantat?.addMediaSource(mediaSourceItem)
@@ -930,14 +913,36 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
             exoplayerUrlPosition = exoplayerUrlPosition + 1
 
-            videoUrl.background?.exoplayerUrlPosition = exoplayerUrlPosition
+            videoUrls[currPosition].background?.exoplayerUrlPosition = exoplayerUrlPosition
+
+
+            // for next video
+
+            try
+            {
+                if(currPosition <= (videoUrls.size - 2))
+                {
+                    if(videoUrls[currPosition + 1].background?.video?.source != null)
+                    {
+                        val mediaItem = MediaItem.fromUri("${videoUrls[currPosition + 1].background?.video?.source}")
+                        val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(mediaItem)
+                        mediaSourceCantat?.addMediaSource(mediaSourceItem)
+
+                        exoplayerUrlPosition = exoplayerUrlPosition + 1
+
+                        videoUrls[currPosition].background?.forNextUrlPosition = exoplayerUrlPosition
+                    }
+                }
+            }
+            catch (e : Exception){}
 
 
             // Segment Video
 
-            if(videoUrl.segments != null)
+            if(videoUrls[currPosition].segments != null)
             {
-                for (segments in videoUrl.segments)
+                for (segments in videoUrls[currPosition].segments!!)
                 {
                     if(segments.video?.source != null)
                     {
@@ -981,7 +986,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             override fun onPositionDiscontinuity(reason: Int) {
                 Log.d("onPositionDiscontinuit ", "${reason}")
 
-                if(reason == 0 && middleVideoPlaying == 1 && videos[adapterPosition].isSecurityEnabled == false)
+                if(reason == 0 && middleVideoPlaying == 1 && videos[adapterPosition].privateType == false)
                 {
                     showBackVideo.visibility = View.GONE
                     middleVideoPlaying = 0
@@ -1044,72 +1049,10 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
         Log.d("onRestart called", "onRestart")
 
-        isActivityOpened = 1
-
-        var model = videos[adapterPosition]
-        model.currentIndex = 0
-
-        adapter?.allItemUpdateAdapter()
-
-        if(videos[adapterPosition].background?.video?.source != null)
+        if(videos.size > adapterPosition)
         {
-            // video
-            currentVideoPosition = currentVideoPosition + 1
-            player?.seekToDefaultPosition(adapterPosition)
-            player?.playWhenReady = true
-            player?.play()
-            player!!.repeatMode =  Player.REPEAT_MODE_ONE
-            showBackVideo.visibility = View.VISIBLE
-        }
-
-
-        try{
-            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.image?.source != null)
+            if(videos[adapterPosition].privateType == false)
             {
-                yourMethod(adapterPosition)
-            }
-        }
-        catch (e :Exception){}
-
-
-        try{
-            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
-            {
-                showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
-            }
-        }
-        catch (e :Exception){}
-
-
-        try{
-            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null)
-            {
-                GlobalScope.launch(Dispatchers.IO)
-                {
-                    setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString())
-                }
-            }
-        }
-        catch (e :Exception){}
-
-        try{
-            if (videos[adapterPosition].background?.audio?.source != null) {
-                playNextTrack(videos[adapterPosition].background?.audio?.source.toString())
-            }
-        }
-        catch (e : Exception){}
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        Log.d("onResume called", "onResume")
-
-        try{
-            if(locationenabled == 0)
-            {
-                locationenabled = 1
                 isActivityOpened = 1
 
                 var model = videos[adapterPosition]
@@ -1150,8 +1093,9 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                 try{
                     if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null)
                     {
-                        GlobalScope.launch(Dispatchers.IO) {
-                            setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString())
+                        GlobalScope.launch(Dispatchers.IO)
+                        {
+                            setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString(), adapterPosition)
                         }
                     }
                 }
@@ -1159,16 +1103,86 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                 try{
                     if (videos[adapterPosition].background?.audio?.source != null) {
-                        GlobalScope.launch(Dispatchers.IO) {
-                            playNextTrack(videos[adapterPosition].background?.audio?.source.toString())
-                        }
+                        playNextTrack(videos[adapterPosition].background?.audio?.source.toString())
                     }
                 }
                 catch (e : Exception){}
             }
-
         }
-        catch (e : Exception){}
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        Log.d("onResume called", "onResume")
+
+
+        if(videos.size > adapterPosition)
+        {
+            if(videos[adapterPosition].privateType == false) {
+                try {
+                    if (locationenabled == 0) {
+                        locationenabled = 1
+                        isActivityOpened = 1
+
+                        var model = videos[adapterPosition]
+                        model.currentIndex = 0
+
+                        adapter?.allItemUpdateAdapter()
+
+                        if (videos[adapterPosition].background?.video?.source != null) {
+                            // video
+                            currentVideoPosition = currentVideoPosition + 1
+                            player?.seekToDefaultPosition(adapterPosition)
+                            player?.playWhenReady = true
+                            player?.play()
+                            player!!.repeatMode = Player.REPEAT_MODE_ONE
+                            showBackVideo.visibility = View.VISIBLE
+                        }
+
+
+                        try {
+                            if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.image?.source != null) {
+                                yourMethod(adapterPosition)
+                            }
+                        } catch (e: Exception) {
+                        }
+
+
+                        try {
+                            if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
+                                showMiddleVideo(
+                                    videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
+                                    adapterPosition
+                                )
+                            }
+                        } catch (e: Exception) {
+                        }
+
+
+                        try {
+                            if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null) {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString(), adapterPosition)
+                                }
+                            }
+                        } catch (e: Exception) {
+                        }
+
+                        try {
+                            if (videos[adapterPosition].background?.audio?.source != null) {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    playNextTrack(videos[adapterPosition].background?.audio?.source.toString())
+                                }
+                            }
+                        } catch (e: Exception) {
+                        }
+                    }
+
+                } catch (e: Exception) {
+                }
+            }
+        }
     }
 
     override fun onPause() {
@@ -1214,7 +1228,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     private fun playNextTrack(url: String) {
         try {
-            if(videos[adapterPosition].isSecurityEnabled == false)
+            if(videos[adapterPosition].privateType == false)
             {
                 mediaPlayer?.reset()
                 mediaPlayer?.setDataSource(url)
@@ -1226,16 +1240,30 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
         catch (e : Exception){}
     }
 
-    private fun setMiddleVideoTrack(url: String) {
-
+    private fun setMiddleVideoTrack(url: String, position : Int) {
         try {
-            if(videos[adapterPosition].isSecurityEnabled == false) {
-                middleMediaPlayer?.reset()
-                middleMediaPlayer?.setDataSource(url)
-                middleMediaPlayer?.prepare()
-                middleMediaPlayer?.isLooping = true
-                middleMediaPlayer?.start()
+            if(videos.size > position)
+            {
+                runOnUiThread {
+                    if (videos[position].privateType == false) {
+                        middleMediaPlayer?.reset()
+                        middleMediaPlayer?.setDataSource(url)
+                        middleMediaPlayer?.prepare()
+                        middleMediaPlayer?.isLooping = true
+                        middleMediaPlayer?.start()
+                    }
+                }
             }
+
+            try {
+                val msec = MediaPlayer.create(
+                    this,
+                    Uri.parse(videos[position].segments?.get(videos[position].currentIndex)?.video?.source)
+                ).duration
+                currentInterval = msec.toDouble()
+            } catch (e: Exception) {
+            }
+
         } catch (e : Exception){}
     }
 
@@ -1256,24 +1284,27 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
     }
 
     fun showMiddleVideo(middleVideoPosition:Int,position: Int) {
-
-
         try {
-            if(videos[position].isSecurityEnabled == false)
+            if(videos.size > position)
             {
-                middleVideoPlaying = 1
+                if(videos[position].privateType == false)
+                {
+                    runOnUiThread {
+                        middleVideoPlaying = 1
+                        binding.imageView.visibility = View.GONE
+                        showBackVideo.visibility = View.VISIBLE
+                        player?.seekToDefaultPosition(middleVideoPosition)
+                        player?.playWhenReady = true
+                        player?.play()
+                    }
 
-                binding.imageView.visibility = View.GONE
-                showBackVideo.visibility = View.VISIBLE
-                player?.seekToDefaultPosition(middleVideoPosition)
-                player?.playWhenReady = true
-                player?.play()
 
-                try {
-                    val msec = MediaPlayer.create(this, Uri.parse(videos[position].segments?.get(videos[position].currentIndex)?.video?.source)).duration
-                    currentInterval = msec.toDouble()
+                    try {
+                        val msec = MediaPlayer.create(this, Uri.parse(videos[position].segments?.get(videos[position].currentIndex)?.video?.source)).duration
+                        currentInterval = msec.toDouble()
+                    }
+                    catch (e : Exception){}
                 }
-                catch (e : Exception){}
             }
         }catch (e : Exception){}
     }
@@ -1326,48 +1357,48 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                 Log.d("surender kumar error", "onFinish")
 
-
-                if((videos[adapterPosition].segments!!.size ) == model.currentIndex)
+                if(videos.size > adapterPosition)
                 {
-                    model.currentIndex = 0
-                    adapter?.allItemUpdateAdapter()
-
-                    binding.viewPager.currentItem = adapterPosition + 1
-                }
-
-
-                if(middleVideoPlaying == 0)
-                {
-                    adapter?.updateAdapter(model.currentIndex,0.0)
-
-                    try {
-                        if (videos[adapterPosition].segments?.get(model.currentIndex)?.image != null) {
-                            yourMethod(adapterPosition)
-                        }
-
-                        if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
-                        {
-                            showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
-                        }
-
-                        if(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source != null)
-                        {
-                            GlobalScope.launch(Dispatchers.IO) {
-                                setMiddleVideoTrack(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source.toString())
-                            }
-                        }
-                    } catch (e: Exception) {
+                    if((videos[adapterPosition].segments!!.size ) == model.currentIndex)
+                    {
                         model.currentIndex = 0
                         adapter?.allItemUpdateAdapter()
-                        if (videos[position].segments?.get(model.currentIndex)?.image != null) {
-                            yourMethod(position)
+
+                        binding.viewPager.currentItem = adapterPosition + 1
+                    }
+
+                    if(middleVideoPlaying == 0)
+                    {
+                        adapter?.updateAdapter(model.currentIndex,0.0)
+
+                        try {
+                            if (videos[adapterPosition].segments?.get(model.currentIndex)?.image != null) {
+                                yourMethod(adapterPosition)
+                            }
+
+                            if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
+                            {
+                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                            }
+
+                            if(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source != null)
+                            {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    setMiddleVideoTrack(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source.toString(), position)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            model.currentIndex = 0
+                            adapter?.allItemUpdateAdapter()
+                            if (videos[position].segments?.get(model.currentIndex)?.image != null) {
+                                yourMethod(position)
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Start the countdown timer
         if(countDownTimer != null)
         {
             countDownTimer!!.start()
@@ -1390,22 +1421,16 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
         handler.postDelayed(object : Runnable {
             override fun run() {
                 // Call the method
-                watch_duration = watch_duration + 1
 
-                Log.d("after every ", "${watch_duration}")
+                if(videos.size > adapterPosition)
+                {
+                    if(videos[adapterPosition].privateType == false)
+                    {
+                        watch_duration = watch_duration + 1
+                        Log.d("after every ", "${watch_duration}")
+                    }
 
-
-
-//                var dur =  currentInterval / 1000
-//
-//                try {
-//                        var model = videos[adapterPosition]
-//
-//                    adapter?.updateProgress(model.currentIndex,(((screenWidthDp / videos[adapterPosition].segments!!.size) - 10)/dur).toInt())
-//                }
-//                catch (e: Exception){}
-
-                // Schedule the next call after the delay
+                }
                 handler.postDelayed(this, delayMillis)
             }
         }, delayMillis)
@@ -1416,16 +1441,23 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             override fun run() {
                 // Call the method
 
-                if(locationenabled == 1)
+                if(videos.size > adapterPosition)
                 {
-                    var dur =  currentInterval / 100
+                    if(videos[adapterPosition].privateType == false) {
+                        if (locationenabled == 1) {
+                            var dur = currentInterval / 100
 
-                    try {
-                        var model = videos[adapterPosition]
+                            try {
+                                var model = videos[adapterPosition]
 
-                        adapter?.updateProgress(model.currentIndex,(((screenWidthDp / videos[adapterPosition].segments!!.size) -  12)/dur))
+                                adapter?.updateProgress(
+                                    model.currentIndex,
+                                    (((screenWidthDp / videos[adapterPosition].segments!!.size) - 12) / dur)
+                                )
+                            } catch (e: Exception) {
+                            }
+                        }
                     }
-                    catch (e: Exception){}
                 }
 
                 // Schedule the next call after the delay
@@ -1488,7 +1520,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             imageFile
         )
 
-        val shareBody = "https://cmsbe.aideo.in/share/$videoId"
+        val shareBody = "https://aideobe.kdcstaging.in/share/$videoId"
 
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
@@ -1499,135 +1531,139 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
     }
 
     override fun clickOnLeftSide() {
-
-        if(videos[adapterPosition].isSecurityEnabled == false)
+        if(videos.size > adapterPosition)
         {
-            var model = videos[adapterPosition]
-
-            if(model.currentIndex > 0)
+            if(videos[adapterPosition].privateType == false)
             {
-                model.currentIndex--
-            }
+                var model = videos[adapterPosition]
 
-            if((videos[adapterPosition].segments!!.size) == model.currentIndex)
-            {
-                model.currentIndex = 0
-                adapter?.allItemUpdateAdapter()
-
-
-                binding.imageView.visibility = View.GONE
-
-                binding.viewPager.currentItem = adapterPosition + 1
-            }
-
-            adapter?.updateAdapter(model.currentIndex,0.0)
-
-            if(middleVideoPlaying == 1)
-            {
-                middleVideoPlaying = 0
-                player!!.pause()
-                player!!.playWhenReady = false
-                showBackVideo.visibility = View.GONE
-            }
-
-
-
-            try{
-                if (videos[adapterPosition].segments?.get(model.currentIndex)?.image != null) {
-                    yourMethod(adapterPosition)
-                }
-            }
-            catch (e : Exception){}
-
-
-
-            try{
-                if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
+                if(model.currentIndex > 0)
                 {
-                    showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                    model.currentIndex--
                 }
-            }
-            catch (e : Exception){}
 
-
-            try{
-                if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null)
+                if((videos[adapterPosition].segments!!.size) == model.currentIndex)
                 {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString())
+                    model.currentIndex = 0
+                    adapter?.allItemUpdateAdapter()
+
+
+                    binding.imageView.visibility = View.GONE
+
+                    binding.viewPager.currentItem = adapterPosition + 1
+                }
+
+                adapter?.updateAdapter(model.currentIndex,0.0)
+
+                if(middleVideoPlaying == 1)
+                {
+                    middleVideoPlaying = 0
+                    player!!.pause()
+                    player!!.playWhenReady = false
+                    showBackVideo.visibility = View.GONE
+                }
+
+
+
+                try{
+                    if (videos[adapterPosition].segments?.get(model.currentIndex)?.image != null) {
+                        yourMethod(adapterPosition)
                     }
                 }
+                catch (e : Exception){}
+
+
+
+                try{
+                    if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
+                    {
+                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                    }
+                }
+                catch (e : Exception){}
+
+
+                try{
+                    if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null)
+                    {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString(), adapterPosition)
+                        }
+                    }
+                }
+                catch (e : Exception){}
             }
-            catch (e : Exception){}
         }
     }
 
     override fun clickOnRightSide() {
 
-        if(videos[adapterPosition].isSecurityEnabled == false) {
+        if(videos.size > adapterPosition)
+        {
+            if(videos[adapterPosition].privateType == false) {
 
-            var model = videos[adapterPosition]
+                var model = videos[adapterPosition]
 
-            model.currentIndex++
+                model.currentIndex++
 
-            if ((videos[adapterPosition].segments!!.size) == model.currentIndex) {
-                model.currentIndex = 0
-                adapter?.allItemUpdateAdapter()
+                if ((videos[adapterPosition].segments!!.size) == model.currentIndex) {
+                    model.currentIndex = 0
+                    adapter?.allItemUpdateAdapter()
 
 
-                binding.imageView.visibility = View.GONE
+                    binding.imageView.visibility = View.GONE
 
-                binding.viewPager.currentItem = adapterPosition + 1
-            }
-
-            adapter?.updateAdapter(model.currentIndex, 0.0)
-
-            if (middleVideoPlaying == 1) {
-                middleVideoPlaying = 0
-                try {
-                    player!!.pause()
-                    player!!.playWhenReady = false
-
-                    showBackVideo.visibility = View.GONE
-
-                } catch (e: Exception) {
+                    binding.viewPager.currentItem = adapterPosition + 1
                 }
-            }
 
+                adapter?.updateAdapter(model.currentIndex, 0.0)
 
+                if (middleVideoPlaying == 1) {
+                    middleVideoPlaying = 0
+                    try {
+                        player!!.pause()
+                        player!!.playWhenReady = false
 
+                        showBackVideo.visibility = View.GONE
 
-
-            try {
-                if (videos[adapterPosition].segments?.get(model.currentIndex)?.image != null) {
-                    yourMethod(adapterPosition)
-                }
-            } catch (e: Exception) {
-            }
-
-
-            try {
-                if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
-                    showMiddleVideo(
-                        videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
-                        adapterPosition
-                    )
-                }
-            } catch (e: Exception) {
-            }
-
-
-            try {
-                if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null) {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString())
+                    } catch (e: Exception) {
                     }
                 }
-            } catch (e: Exception) {
+
+
+
+
+
+                try {
+                    if (videos[adapterPosition].segments?.get(model.currentIndex)?.image != null) {
+                        yourMethod(adapterPosition)
+                    }
+                } catch (e: Exception) {
+                }
+
+
+                try {
+                    if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
+                        showMiddleVideo(
+                            videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
+                            adapterPosition
+                        )
+                    }
+                } catch (e: Exception) {
+                }
+
+
+                try {
+                    if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString(), adapterPosition)
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+
             }
-
         }
-
     }
 
     fun loadNewPage(position : Int){
@@ -1641,169 +1677,224 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
         stopMiddlePlayback()
         stopPlayback()
 
-
-        if(videos[position].isSecurityEnabled == true)
-        {
-            binding.securityLayout.visibility = View.VISIBLE
-
-            binding.imageView.visibility = View.GONE
-
-            player?.playWhenReady = false
-            player?.pause()
-            showBackVideo.visibility = View.GONE
-        }
-        else
-        {
-            binding.securityLayout.visibility = View.GONE
-            if(isActivityOpened == 1)
+        try {
+            if(videos.size > position)
             {
-                videos[position].currentIndex = 0
-                middleVideoPlaying = 0
+                viewPagerAdapter?.updateTextValue(videos[position].title.toString())
+            }
+        }
+        catch (e : Exception){}
 
-                showBackVideo.visibility = View.GONE
+
+        try {
+            if(videos[position].privateType == true)
+            {
+                binding.securityLayout.visibility = View.VISIBLE
+
                 binding.imageView.visibility = View.GONE
 
-                try{
+                player?.playWhenReady = false
+                player?.pause()
+                showBackVideo.visibility = View.GONE
+
+
+                try {
                     adapter = StatusAdapter(viewPagerList, position, screenWidthDp)
                     recyclerView?.adapter = adapter
-
-                    if(videos[position].segments?.get(videos[position].currentIndex)?.image?.source != null)
-                    {
-                        yourMethod(position)
-                    }
-                    else
-                    {
-                        binding.imageView.visibility = View.GONE
-                    }
 
                     GlobalScope.launch(Dispatchers.IO) {
                         adapter?.allItemUpdateAdapter()
                         adapter?.updateAdapter(videos[position].currentIndex, 0.0)
                     }
                 }
-                catch (e :Exception){}
-
-
-                if(videos[position].background?.video?.source != null)
+                catch (e : Exception){}
+            }
+            else
+            {
+                binding.securityLayout.visibility = View.GONE
+                if(isActivityOpened == 1)
                 {
-                    Log.d("back video called","${videos[position].background?.video?.source}")
+                    videos[position].currentIndex = 0
+                    middleVideoPlaying = 0
 
-                    // video
-                    currentVideoPosition = currentVideoPosition + 1
-
-                    videos[position].background?.exoplayerUrlPosition?.let {
-                        player?.seekToDefaultPosition(
-                            it
-                        )
-                    }
-                    player?.playWhenReady = true
-                    player?.play()
-                    player!!.repeatMode =  Player.REPEAT_MODE_ONE
-                    showBackVideo.visibility = View.VISIBLE
-                }
-                else
-                {
-                    player?.playWhenReady = false
-                    player?.pause()
                     showBackVideo.visibility = View.GONE
-                }
+                    binding.imageView.visibility = View.GONE
 
-                try{
-                    if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
-                    {
-                        showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos, position)
-                    }
-                }
-                catch (e :Exception){}
+                    try{
+                        adapter = StatusAdapter(viewPagerList, position, screenWidthDp)
+                        recyclerView?.adapter = adapter
 
-                GlobalScope.launch(Dispatchers.IO) {
-                    try {
-                        if (videos[position].segments?.get(videos[position].currentIndex)?.audio?.source != null) {
-                            setMiddleVideoTrack(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source.toString())
+                        if(videos[position].segments?.get(videos[position].currentIndex)?.image?.source != null)
+                        {
+
+
+                            yourMethod(position)
                         }
-                    } catch (e: Exception) {
-                    }
-                }
-
-
-                GlobalScope.launch(Dispatchers.IO) {
-                    try {
-                        if (videos[position].background?.audio?.source != null) {
-                            playNextTrack(videos[position].background?.audio?.source.toString())
+                        else
+                        {
+                            binding.imageView.visibility = View.GONE
                         }
-                    } catch (e: Exception) {
+
+                        GlobalScope.launch(Dispatchers.IO) {
+                            adapter?.allItemUpdateAdapter()
+                            adapter?.updateAdapter(videos[position].currentIndex, 0.0)
+                        }
                     }
-                }
+                    catch (e :Exception){}
 
 
-                val orientation = resources.configuration.orientation
-                if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-                {
-                    binding.share2.visibility = View.GONE
-                    binding.tvShare2.visibility = View.GONE
-                    binding.tvReadMore.visibility = View.GONE
-                }
-                else
-                {
-
-                    // Get the existing layout parameters
-                    val layoutParams = binding.showBackVideo.layoutParams as ConstraintLayout.LayoutParams
-                    val layoutParamsImage = binding.imageInLandscape.layoutParams as ConstraintLayout.LayoutParams
-
-
-                    // Set the new margins in pixels (you can adjust these values)
-                    val newStartMargin = 0
-                    val newTopMargin = 150
-                    val newEndMargin = 0
-                    val newBottomMargin = 150
-
-                    // Set the new margins
-                    layoutParams.setMargins(newStartMargin, newTopMargin, newEndMargin, newBottomMargin)
-                    layoutParamsImage.setMargins(newStartMargin, newTopMargin, newEndMargin, newBottomMargin)
-
-                    // Apply the updated layout parameters to the view
-                    binding.showBackVideo.layoutParams = layoutParams
-                    binding.imageInLandscape.layoutParams = layoutParamsImage
-
-
-                    if(videos[position].callToAction != null && videos[position].callToAction.toString() != "")
+                    if(videos[position].background?.video?.source != null)
                     {
-                        binding.share2.visibility = View.VISIBLE
-                        binding.share1.visibility = View.GONE
+                        Log.d("back video called","${videos[position].background?.video?.source}")
+
+                        // video
+                        currentVideoPosition = currentVideoPosition + 1
+
+
+                        if(watch_duration < 30)
+                        {
+                            runOnUiThread {
+                                videos[position].background?.forNextUrlPosition?.let {
+                                    player?.seekToDefaultPosition(
+                                        it
+                                    )
+                                }
+
+                                player?.playWhenReady = true
+                                player?.play()
+                                player!!.repeatMode =  Player.REPEAT_MODE_ONE
+                                showBackVideo.visibility = View.VISIBLE
+                            }
+                        }
+                        else
+                        {
+                            runOnUiThread {
+                                videos[position].background?.exoplayerUrlPosition?.let {
+                                    player?.seekToDefaultPosition(
+                                        it
+                                    )
+                                }
+
+                                player?.playWhenReady = true
+                                player?.play()
+                                player!!.repeatMode =  Player.REPEAT_MODE_ONE
+                                showBackVideo.visibility = View.VISIBLE
+                            }
+                        }
+
                     }
                     else
                     {
-                        binding.share2.visibility = View.GONE
-                        binding.share1.visibility = View.VISIBLE
-                    }
-                }
-
-
-                if(position != 0)
-                {
-                    var list : ArrayList<String> = ArrayList()
-                    for(tagsData in videos[position - 1].tagsData!!)
-                    {
-                        list.add(tagsData._id.toString())
+                        player?.playWhenReady = false
+                        player?.pause()
+                        showBackVideo.visibility = View.GONE
                     }
 
-                    try
-                    {
-                        GlobalScope.launch(Dispatchers.IO)
+                    try{
+                        if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
                         {
-                            callLogsApi(videos[position - 1].id.toString(), currentCityName, list, last_duration.toString())
+                            showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos, position)
                         }
                     }
-                    catch (e : Exception){}
+                    catch (e :Exception){}
+
+                    GlobalScope.launch(Dispatchers.IO) {
+                        try {
+                            if (videos[position].segments?.get(videos[position].currentIndex)?.audio?.source != null) {
+                                setMiddleVideoTrack(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source.toString(), position)
+                            }
+                        } catch (e: Exception) {
+                        }
+                    }
+
+
+                    GlobalScope.launch(Dispatchers.IO) {
+                        try {
+                            if (videos[position].background?.audio?.source != null) {
+                                playNextTrack(videos[position].background?.audio?.source.toString())
+                            }
+                        } catch (e: Exception) {
+                        }
+                    }
+
+
+                    val orientation = resources.configuration.orientation
+                    if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    {
+                        binding.share2.visibility = View.GONE
+                        binding.tvShare2.visibility = View.GONE
+                        binding.tvReadMore.visibility = View.GONE
+                    }
+                    else
+                    {
+
+                        // Get the existing layout parameters
+                        val layoutParams = binding.showBackVideo.layoutParams as ConstraintLayout.LayoutParams
+                        val layoutParamsImage = binding.imageInLandscape.layoutParams as ConstraintLayout.LayoutParams
+
+
+                        // Set the new margins in pixels (you can adjust these values)
+                        val newStartMargin = 0
+                        val newTopMargin = 150
+                        val newEndMargin = 0
+                        val newBottomMargin = 150
+
+                        // Set the new margins
+                        layoutParams.setMargins(newStartMargin, newTopMargin, newEndMargin, newBottomMargin)
+                        layoutParamsImage.setMargins(newStartMargin, newTopMargin, newEndMargin, newBottomMargin)
+
+                        // Apply the updated layout parameters to the view
+                        binding.showBackVideo.layoutParams = layoutParams
+                        binding.imageInLandscape.layoutParams = layoutParamsImage
+
+
+                        if(videos[position].callToAction != null && videos[position].callToAction.toString() != "")
+                        {
+                            binding.share2.visibility = View.VISIBLE
+                            binding.share1.visibility = View.GONE
+                        }
+                        else
+                        {
+                            binding.share2.visibility = View.GONE
+                            binding.share1.visibility = View.VISIBLE
+                        }
+                    }
+
+
+                    if(position != 0)
+                    {
+                        var list : ArrayList<String> = ArrayList()
+                        for(tagsData in videos[position - 1].tagsData!!)
+                        {
+                            list.add(tagsData._id.toString())
+                        }
+
+                        try
+                        {
+                            GlobalScope.launch(Dispatchers.IO)
+                            {
+                                callLogsApi(videos[position - 1].id.toString(), currentCityName, list, last_duration.toString())
+                            }
+                        }
+                        catch (e : Exception){}
+                    }
+
+                    if((videos.size - 2) <= position)
+                    {
+                        getReloadContent(currentCityName)
+                    }
                 }
 
-                if((videos.size - 2) <= position)
-                {
-                    getReloadContent(currentCityName)
-                }
+                videos[position].isViewed = 1
             }
+        }
+        catch (e : Exception){}
 
-            videos[position].isViewed = 1
+        if((videos.size - 2) <= position) {
+            GlobalScope.launch(Dispatchers.IO)
+            {
+                getReloadContent(currentCityName)
+            }
         }
 
     }
@@ -1815,5 +1906,4 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
-
 }

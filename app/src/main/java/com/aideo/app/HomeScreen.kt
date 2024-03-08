@@ -66,7 +66,7 @@ class HomeScreen : AppCompatActivity() {
         var list = ArrayList<Topic>()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://cmsbe.aideo.in/api/v1/")
+            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
