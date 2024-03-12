@@ -132,6 +132,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     var isUpdateVidoes = 0
 
+    var prepareNextVideo = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -590,10 +591,22 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                             preparePlayer(videos)
 
                             viewPagerAdapter = VideoAdapter(this@HemePlayerScreen, viewPagerList, this@HemePlayerScreen)
-
                             binding.viewPager.adapter = viewPagerAdapter
                             binding.viewPager.setPageTransformer(ZoomOutPageTransformer())
 
+                            if(videos.size > 0)
+                            {
+                                viewPagerAdapter?.updateTextValue(videos[adapterPosition].title.toString())
+                            }
+
+
+                            if(videos.size > 0)
+                            {
+                                if(videos[0].title != null)
+                                {
+                                    viewPagerAdapter?.updateTextValue(videos[0].title.toString())
+                                }
+                            }
 
                             adapter = StatusAdapter(viewPagerList, adapterPosition, screenWidthDp)
                             recyclerView?.adapter = adapter
@@ -813,9 +826,16 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                 Log.d("onPageSelected","${position}")
 
-                loadNewPage(position)
+                if(position >= videos.size)
+                {
+                    binding.viewPager.currentItem = 0
+                }
+                else
+                {
+                    loadNewPage(position)
 
-                adapterPosition = position
+                    adapterPosition = position
+                }
             }
 
             /**
@@ -889,16 +909,18 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     private fun preparePlayer(videoUrls: ArrayList<ContentData>) {
 
-        val dataSourceFactory = DefaultDataSourceFactory(this, "your_user_agent")
+        val dataSourceFactory = DefaultDataSourceFactory(this, "your_user_agent${reloadApiCount}")
 
         for (currPosition in 0..(videoUrls.size - 1))
         {
+
             // Background Video
 
             if(firstVideo == 0 && videoUrls[currPosition].background?.video?.source == null)
             {
                 firstVideo = 1
-                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/64c4eec976feff29b693a7c5/1.mp4")
+
+                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/65e6e8f0020854301254f7d1/1.mp4")
                 val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
                 mediaSourceCantat?.addMediaSource(mediaSourceItem)
@@ -922,7 +944,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             {
                 if(currPosition <= (videoUrls.size - 2))
                 {
-                    if(videoUrls[currPosition + 1].background?.video?.source != null)
+                    if(videoUrls[currPosition +1].background?.video?.source != null)
                     {
                         val mediaItem = MediaItem.fromUri("${videoUrls[currPosition + 1].background?.video?.source}")
                         val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -931,7 +953,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                         exoplayerUrlPosition = exoplayerUrlPosition + 1
 
-                        videoUrls[currPosition].background?.forNextUrlPosition = exoplayerUrlPosition
+                        videoUrls[currPosition + 1].background?.forNextUrlPosition = exoplayerUrlPosition
                     }
                 }
             }
@@ -957,7 +979,6 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             }
 
         }
-
         // Prepare the player with the concatenated media source
         player?.setMediaSource(mediaSourceCantat!!)
 
@@ -984,21 +1005,25 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             }
 
             override fun onPositionDiscontinuity(reason: Int) {
-                Log.d("onPositionDiscontinuit ", "${reason}")
 
-                if(reason == 0 && middleVideoPlaying == 1 && videos[adapterPosition].privateType == false)
+                if(reason == 0 && middleVideoPlaying == 1 && prepareNextVideo == 0)
                 {
+                    prepareNextVideo = 1
+
+                    Handler().postDelayed({
+                        prepareNextVideo = 0
+                    }, 1000)
+
                     showBackVideo.visibility = View.GONE
                     middleVideoPlaying = 0
 
-                    Log.d("surender kumar ", "${reason}")
+                    Log.d("surender kumar onPosi", "${reason}")
 
                     var model = videos[adapterPosition]
 
                     model.currentIndex++
 
                     adapter?.updateAdapter(model.currentIndex,0.0)
-
 
                     try {
                         if((videos[adapterPosition].segments!!.size ) == model.currentIndex)
@@ -1026,15 +1051,17 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                     try {
                         if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
-                            showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                            showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos
+                                ,adapterPosition,
+                                videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                         }
                     } catch (e : Exception) {}
                 }
 
+
             }
-
-        })
-
+        }
+        )
     }
 
     override fun onStart() {
@@ -1084,7 +1111,9 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                 try{
                     if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
                     {
-                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos
+                            ,adapterPosition
+                        ,videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                     }
                 }
                 catch (e :Exception){}
@@ -1153,7 +1182,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                             if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
                                 showMiddleVideo(
                                     videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
-                                    adapterPosition
+                                    adapterPosition,
+                                    videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString()
                                 )
                             }
                         } catch (e: Exception) {
@@ -1283,30 +1313,149 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
         catch (e : Exception){}
     }
 
-    fun showMiddleVideo(middleVideoPosition:Int,position: Int) {
-        try {
-            if(videos.size > position)
+    fun showMiddleVideo(middleVideoPosition:Int,position: Int, videoUrlPre : String) {
+        middleVideoPlaying = 1
+
+        if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.interval != null)
+        {
+            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video!!.interval == 0.0)
             {
-                if(videos[position].privateType == false)
+                val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                    override fun onDurationCalculated(duration: Long?) {
+
+                        if (duration != null) {
+                            val durationSeconds = duration
+
+
+                            try {
+                                if(videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video?.interval != null)
+                                {
+                                    videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video!!.interval = durationSeconds.toDouble()
+                                }
+
+                                if(videos[position].privateType == false) {
+                                    try {
+                                        runOnUiThread {
+                                            binding.imageView.visibility = View.GONE
+                                            showBackVideo.visibility = View.VISIBLE
+                                            player?.seekToDefaultPosition(middleVideoPosition)
+                                            player?.playWhenReady = true
+                                            player?.play()
+                                        }
+                                    } catch (e: Exception) {
+                                    }
+                                }
+                            }
+                            catch (e : Exception){}
+
+
+                            try {
+                                if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+                                {
+                                    nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+                                }
+                            }
+                            catch (e : Exception){}
+
+                        } else {
+                            println("Failed to retrieve video duration")
+                        }
+                    }
+
+                    override fun onError(error: Exception) {
+                        error.printStackTrace()
+                    }
+                })
+
+                durationCalculator.execute(videoUrlPre)
+            }
+            else
+            {
+                if(videos.size > position)
                 {
-                    runOnUiThread {
-                        middleVideoPlaying = 1
-                        binding.imageView.visibility = View.GONE
-                        showBackVideo.visibility = View.VISIBLE
-                        player?.seekToDefaultPosition(middleVideoPosition)
-                        player?.playWhenReady = true
-                        player?.play()
-                    }
+                    if(videos[position].privateType == false) {
+                        try {
+                            runOnUiThread {
+                                binding.imageView.visibility = View.GONE
+                                showBackVideo.visibility = View.VISIBLE
+                                player?.seekToDefaultPosition(middleVideoPosition)
+                                player?.playWhenReady = true
+                                player?.play()
+                            }
+                        } catch (e: Exception) {
+                        }
 
-
-                    try {
-                        val msec = MediaPlayer.create(this, Uri.parse(videos[position].segments?.get(videos[position].currentIndex)?.video?.source)).duration
-                        currentInterval = msec.toDouble()
+                        try {
+                            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+                            {
+                                nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+                            }
+                        }
+                        catch (e : Exception){}
                     }
-                    catch (e : Exception){}
                 }
             }
-        }catch (e : Exception){}
+        }
+        else
+        {
+            val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                override fun onDurationCalculated(duration: Long?) {
+
+                    Log.d("start pickup duration " , "3 ${videoUrlPre}")
+
+                    if (duration != null) {
+                        val durationSeconds = duration
+
+                        Log.d("start pickup duration " , "4")
+
+                        try {
+                            if(videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video?.interval != null)
+                            {
+                                Log.d("start pickup duration " , "5")
+                                videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video!!.interval = durationSeconds.toDouble()
+                            }
+
+                            Log.d("start pickup duration " , "6")
+
+                            if(videos.size > position)
+                            {
+                                if(videos[position].privateType == false) {
+                                    try {
+                                        runOnUiThread {
+                                            binding.imageView.visibility = View.GONE
+                                            showBackVideo.visibility = View.VISIBLE
+                                            player?.seekToDefaultPosition(middleVideoPosition)
+                                            player?.playWhenReady = true
+                                            player?.play()
+                                        }
+                                    } catch (e: Exception) {
+                                    }
+                                }
+                            }
+                        }
+                        catch (e : Exception){}
+
+
+                        try {
+                            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+                            {
+                                nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+                            }
+                        }
+                        catch (e : Exception){}
+
+                    } else {
+                        println("Failed to retrieve video duration")
+                    }
+                }
+
+                override fun onError(error: Exception) {
+                    error.printStackTrace()
+                }
+            })
+
+            durationCalculator.execute(videoUrlPre)
+        }
     }
 
     fun yourMethod(position:Int) {
@@ -1378,7 +1527,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                             if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
                             {
-                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos,adapterPosition,videos[position].segments?.get(videos[position].currentIndex)?.video?.source.toString())
                             }
 
                             if(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source != null)
@@ -1396,6 +1545,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                         }
                     }
                 }
+
+                preloadNextSegmentImage(adapterPosition)
             }
         }
 
@@ -1441,24 +1592,65 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             override fun run() {
                 // Call the method
 
-                if(videos.size > adapterPosition)
+                if(middleVideoPlaying == 1 && player != null)
                 {
-                    if(videos[adapterPosition].privateType == false) {
-                        if (locationenabled == 1) {
-                            var dur = currentInterval / 100
+                    Log.d("videos is suri","${middleVideoPlaying}")
 
-                            try {
-                                var model = videos[adapterPosition]
+                    var model = videos[adapterPosition]
 
-                                adapter?.updateProgress(
-                                    model.currentIndex,
-                                    (((screenWidthDp / videos[adapterPosition].segments!!.size) - 12) / dur)
-                                )
-                            } catch (e: Exception) {
+                    if(player!!.isPlaying)
+                    {
+                        try {
+                            if(videos.size > adapterPosition) {
+
+                                Log.d("videos is suri 1","${model.segments!![model.currentIndex].video!!.interval}")
+
+                                if (model.privateType == false && model.segments!![model.currentIndex].video!!.interval != 0.0) {
+
+                                    Log.d("videos is suri 2","${middleVideoPlaying}")
+
+                                    if (locationenabled == 1) {
+                                        var dur = model.segments!![model.currentIndex].video!!.interval / 100
+
+                                        try {
+                                            adapter?.updateProgress(
+                                                model.currentIndex,
+                                                (((screenWidthDp / model.segments!!.size) - 12) / dur)
+                                            )
+                                        } catch (e: Exception) {
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (e : Exception){}
+                    }
+                }
+                else
+                {
+                    try {
+                        if(videos.size > adapterPosition) {
+                            if (videos[adapterPosition].privateType == false) {
+
+                                if (locationenabled == 1) {
+                                    var dur = currentInterval / 100
+
+                                    try {
+                                        var model = videos[adapterPosition]
+
+                                        adapter?.updateProgress(
+                                            model.currentIndex,
+                                            (((screenWidthDp / videos[adapterPosition].segments!!.size) - 12) / dur)
+                                        )
+                                    } catch (e: Exception) {
+                                    }
+                                }
                             }
                         }
                     }
+                    catch (e : Exception){}
                 }
+
 
                 // Schedule the next call after the delay
                 handler.postDelayed(this, 100)
@@ -1577,7 +1769,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                 try{
                     if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
                     {
-                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition,
+                            videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                     }
                 }
                 catch (e : Exception){}
@@ -1646,7 +1839,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                     if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
                         showMiddleVideo(
                             videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
-                            adapterPosition
+                            adapterPosition,videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString()
+
                         )
                     }
                 } catch (e: Exception) {
@@ -1655,15 +1849,15 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
                 try {
                     if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source != null) {
-                        GlobalScope.launch(Dispatchers.IO) {
                             setMiddleVideoTrack(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.audio?.source.toString(), adapterPosition)
-                        }
                     }
                 } catch (e: Exception) {
                 }
 
             }
         }
+
+        preloadNextSegmentImage(adapterPosition)
     }
 
     fun loadNewPage(position : Int){
@@ -1758,12 +1952,12 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                     player?.seekToDefaultPosition(
                                         it
                                     )
-                                }
 
-                                player?.playWhenReady = true
-                                player?.play()
-                                player!!.repeatMode =  Player.REPEAT_MODE_ONE
-                                showBackVideo.visibility = View.VISIBLE
+                                    player?.playWhenReady = true
+                                    player?.play()
+                                    player!!.repeatMode =  Player.REPEAT_MODE_ONE
+                                    showBackVideo.visibility = View.VISIBLE
+                                }
                             }
                         }
                         else
@@ -1773,15 +1967,13 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                                     player?.seekToDefaultPosition(
                                         it
                                     )
+                                    player?.playWhenReady = true
+                                    player?.play()
+                                    player!!.repeatMode =  Player.REPEAT_MODE_ONE
+                                    showBackVideo.visibility = View.VISIBLE
                                 }
-
-                                player?.playWhenReady = true
-                                player?.play()
-                                player!!.repeatMode =  Player.REPEAT_MODE_ONE
-                                showBackVideo.visibility = View.VISIBLE
                             }
                         }
-
                     }
                     else
                     {
@@ -1793,7 +1985,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                     try{
                         if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
                         {
-                            showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos, position)
+                            showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos, position,videos[position].segments?.get(videos[position].currentIndex)?.video?.source.toString())
                         }
                     }
                     catch (e :Exception){}
@@ -1855,6 +2047,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                         }
                         else
                         {
+                            binding.tvReadMore.visibility = View.GONE
                             binding.share2.visibility = View.GONE
                             binding.share1.visibility = View.VISIBLE
                         }
@@ -1883,6 +2076,17 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
                     {
                         getReloadContent(currentCityName)
                     }
+
+                    preloadNextAideoImage(position)
+
+                    try
+                    {
+                        if(videos[position + 1].segments!![0].video?.source != null)
+                        {
+                            nextAideoSegmentDuration(0,position + 1, videos[position + 1].segments!![0].video?.source.toString())
+                        }
+                    }
+                    catch (e : Exception){}
                 }
 
                 videos[position].isViewed = 1
@@ -1899,11 +2103,182 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     }
 
+    fun preloadNextAideoImage(position: Int) {
+        try{
+            if(videos[position + 1].segments?.size != null)
+            {
+                if(videos[position + 1].segments?.get(0)?.image?.source != null)
+                {
+                    Glide.with(this@HemePlayerScreen)
+                        .load(videos[position + 1].segments?.get(0)?.image?.source)
+                        .placeholder(R.drawable.plaeholder_image)
+                        .into(binding.nextAideoImage)
+                }
+            }
+        }
+        catch (e : Exception){}
+    }
+
+    fun preloadNextSegmentImage(position: Int) {
+
+        Log.d("Next segment api called", "suri 0")
+
+        var model = videos[position]
+
+        try{
+            if(videos[position].segments?.size != null)
+            {
+                if(videos[position].segments!!.size > model.currentIndex)
+                {
+                    if(videos[position].segments?.get(model.currentIndex + 1)?.image?.source != null)
+                    {
+
+                        Log.d("Next segment api called", "suri 1")
+
+                        Glide.with(this@HemePlayerScreen)
+                            .load(videos[position].segments?.get(model.currentIndex + 1)?.image?.source)
+                            .placeholder(R.drawable.plaeholder_image)
+                            .into(binding.nextSegemnt)
+                    }
+                }
+            }
+        }
+        catch (e : Exception){}
+    }
+
     private fun hideKeyboard() {
         val view = this.currentFocus
         if (view != null) {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
+
+    fun nextAideoSegmentDuration(segmentPosition:Int,adapPosi: Int, videoUrlPre : String) {
+
+        var preModel = videos[adapPosi]
+
+        if(preModel.segments?.get(segmentPosition)?.video?.interval != null)
+        {
+            if(preModel.segments?.get(segmentPosition)?.video!!.interval == 0.0)
+            {
+                val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                    override fun onDurationCalculated(duration: Long?) {
+
+                        if (duration != null) {
+                            val durationSeconds = duration
+
+                            try {
+                                if(preModel.segments!![segmentPosition].video?.interval != null)
+                                {
+                                    preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                                }
+                            }
+                            catch (e : Exception){}
+
+                        } else {
+
+                        }
+                    }
+
+                    override fun onError(error: Exception) {
+                        error.printStackTrace()
+                    }
+                })
+
+                durationCalculator.execute(videoUrlPre)
+            }
+        }
+        else
+        {
+            val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                override fun onDurationCalculated(duration: Long?) {
+
+                    if (duration != null) {
+                        val durationSeconds = duration
+
+                        try {
+                            if(preModel.segments!![segmentPosition].video?.interval != null)
+                            {
+                                preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                            }
+                        }
+                        catch (e : Exception){}
+
+                    } else {
+                    }
+                }
+
+                override fun onError(error: Exception) {
+                    error.printStackTrace()
+                }
+            })
+
+            durationCalculator.execute(videoUrlPre)
+        }
+    }
+
+    fun nextSegmentVideoDuration(segmentPosition:Int,adapPosi: Int, videoUrlPre : String) {
+
+        var preModel = videos[adapPosi]
+
+        if(preModel.segments?.get(segmentPosition)?.video?.interval != null)
+        {
+            if(preModel.segments?.get(segmentPosition)?.video!!.interval == 0.0)
+            {
+                val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                    override fun onDurationCalculated(duration: Long?) {
+
+                        if (duration != null) {
+                            val durationSeconds = duration
+
+                            try {
+                                if(preModel.segments!![segmentPosition].video?.interval != null)
+                                {
+                                    preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                                }
+                            }
+                            catch (e : Exception){}
+
+                        } else {
+
+                        }
+                    }
+
+                    override fun onError(error: Exception) {
+                        error.printStackTrace()
+                    }
+                })
+
+                durationCalculator.execute(videoUrlPre)
+            }
+        }
+        else
+        {
+            val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                override fun onDurationCalculated(duration: Long?) {
+
+                    if (duration != null) {
+                        val durationSeconds = duration
+
+                        try {
+                            if(preModel.segments!![segmentPosition].video?.interval != null)
+                            {
+                                preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                            }
+                        }
+                        catch (e : Exception){}
+
+                    } else {
+                    }
+                }
+
+                override fun onError(error: Exception) {
+                    error.printStackTrace()
+                }
+            })
+
+            durationCalculator.execute(videoUrlPre)
         }
     }
 }

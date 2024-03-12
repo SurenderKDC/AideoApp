@@ -8,5 +8,5 @@ import retrofit2.http.Query
 
 interface VideoContentsApi {
     @GET("mobile/content/place/{id}")
-    fun getVideoContentsTopic(@Path("id") id: String, @Query("no") page: Int): Call<JsonElement>
+    fun getVideoContentsTopic(@Path("id") id: String, @Query("no") no: Int): Call<JsonElement>
 }

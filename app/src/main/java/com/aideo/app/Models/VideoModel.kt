@@ -27,12 +27,12 @@ data class ContentData(
     val description: String?,
     val tagsData: List<Tag>?,
     var callToAction : String?,
-    var privateType : Boolean?
+    var privateType : Boolean = false,
     )
 
 data class Background(val video: Video?, val audio: Audio?,val image:Image?,var exoplayerUrlPosition :Int?,var forNextUrlPosition : Int?)
 
-data class Video(val source: String?)
+data class Video(val source: String?, var interval: Double = 0.0)
 
 data class Segment(
     val chapter: Int?, val image: Image?,val video: Video?, val audio: Audio?,var exoPlayerUrlPos:Int = 0
@@ -62,7 +62,7 @@ data class PlaylistData(
     val liveDate: String?,
     val watchDuration: Int?,
     var callToAction : String?,
-    var privateType : Boolean?
+    var privateType : Boolean = false
 )
 
 

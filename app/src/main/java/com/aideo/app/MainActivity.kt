@@ -91,8 +91,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-
-
+import com.google.android.exoplayer2.PlaybackException
 
 
 val baseUrlForMedia : String = "https://aideobe.kdcstaging.in/controllers/Content/uploads/"
@@ -142,7 +141,9 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
     var viewPagerList = ArrayList<Int>()
 
     var isUpdateVidoes = 0
-    
+
+    var prepareNextVideo = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -481,153 +482,159 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
 
                 if (response.isSuccessful)
                 {
-                        val playlist = Gson().fromJson("{\"playListData\":${response.body().toString()}}", PrefsVideoResponse::class.java)
+                    val playlist = Gson().fromJson("{\"playListData\":${response.body().toString()}}", PrefsVideoResponse::class.java)
 
-                        var playlistData = playlist.playListData
+                    var playlistData = playlist.playListData
 
-                        if (playlistData != null)
+                    if (playlistData != null)
+                    {
+
+                        var startIndex = 0
+                        var endIndex = 10
+
+                        for(i in 0..playlistData.size)
                         {
+                            try {
+                                if(endIndex < playlistData.size)
+                                {
+                                    val sublistToShuffle = playlistData.subList(startIndex, endIndex)
 
-                            var startIndex = 0
-                            var endIndex = 10
+                                    // Shuffle the sublist
+                                    sublistToShuffle.shuffle()
 
-                            for(i in 0..playlistData.size)
-                            {
-                                try {
-                                    if(endIndex < playlistData.size)
-                                    {
-                                        val sublistToShuffle = playlistData.subList(startIndex, endIndex)
+                                    startIndex = startIndex + 10
+                                    endIndex = endIndex + 10
+                                }
+                            }
+                            catch (e : Exception){}
+                        }
 
-                                        // Shuffle the sublist
-                                        sublistToShuffle.shuffle()
 
-                                        startIndex = startIndex + 10
-                                        endIndex = endIndex + 10
+                        for (data in playlistData) {
+                            if (data.contentData != null) {
+                                var obj = JSONObject(data.contentData)
+                                var segmentsArray: JSONArray = obj.optJSONArray("Segments")
+                                var backgroundJson = obj.getJSONObject("Background")
+
+
+                                val segments = mutableListOf<Segment>()
+
+                                // Iterate over the JSONArray elements
+                                for (i in 0 until segmentsArray.length()) {
+                                    // Get the segment object at the current index
+                                    val segmentObject: JSONObject = segmentsArray.getJSONObject(i)
+
+                                    // Extract the properties from the segment object
+                                    val chapter: Int = segmentObject.getInt("Chapter")
+                                    val imageObject: JSONObject? = segmentObject.optJSONObject("Image")
+                                    val audioObject: JSONObject? = segmentObject.optJSONObject("Audio")
+                                    val videoObject: JSONObject? = segmentObject.optJSONObject("Video")
+
+                                    // Parse the image object if it exists
+                                    val image: Image? = imageObject?.let {
+                                        val source: String =
+                                            "${baseUrlForMedia}${data._id}/" + it.getString("Source")
+                                        val interval: Int = it.getInt("Interval")
+                                        Image(source, interval)
+                                    }
+
+                                    // Parse the audio object if it exists
+                                    val video: Video? = videoObject?.let {
+                                        val source: String =
+                                            "${baseUrlForMedia}${data._id}/" + it.getString("Source")
+                                        Video(source)
+                                    }
+
+                                    val audio: Audio? = audioObject?.let {
+                                        val source: String =
+                                            "${baseUrlForMedia}${data._id}/" + it.getString("Source")
+                                        Audio("suri", source)
+                                    }
+
+                                    val segment = Segment(chapter, image, video, audio)
+                                    segments.add(segment)
+                                }
+
+                                val videoJson = backgroundJson.optJSONObject("Video")
+                                val audioJson = backgroundJson.optJSONObject("Audio")
+                                val imageJson = backgroundJson.optJSONObject("Image")
+
+
+                                try{
+                                    val videoSource: Video? = videoJson?.let {
+                                        val source: String =
+                                            "${baseUrlForMedia}${data._id}/" + it.getString("Source")
+                                        Video(source)
+                                    }
+
+                                    val audioSource: Audio? = audioJson?.let {
+                                        val source: String =
+                                            "${baseUrlForMedia}${data._id}/" + it.getString("Source")
+                                        Audio("suri", source)
+                                    }
+
+                                    val imageSource: Image? = imageJson?.let {
+                                        val source: String =
+                                            "${baseUrlForMedia}${data._id}/" + it.getString("Source")
+                                        val interval: Int = it.getInt("Interval")
+                                        Image(source, interval)
+                                    }
+
+
+                                    val background = Background(
+                                        video = videoSource,
+                                        audio = audioSource,
+                                        image = imageSource,
+                                        exoplayerUrlPosition = 0,
+                                        forNextUrlPosition = 0
+                                    )
+
+                                    if (data.liveStatus != "Disabled") {
+                                        var contentData = ContentData(
+                                            version = 1,
+                                            currentIndex = 0,
+                                            background = background,
+                                            segments = segments,
+                                            id = data._id,
+                                            title = data.title,
+                                            description = data.description,
+                                            thumbnail = baseUrlForImage + "" + data.thumbnail,
+                                            tagsData = data.tags,
+                                            callToAction = data.callToAction,
+                                            privateType = data.privateType
+                                        )
+                                        videos.add(contentData)
                                     }
                                 }
                                 catch (e : Exception){}
+
+
                             }
-
-
-                            for (data in playlistData) {
-                                if (data.contentData != null) {
-                                    var obj = JSONObject(data.contentData)
-                                    var segmentsArray: JSONArray = obj.optJSONArray("Segments")
-                                    var backgroundJson = obj.getJSONObject("Background")
-
-
-                                    val segments = mutableListOf<Segment>()
-
-                                    // Iterate over the JSONArray elements
-                                    for (i in 0 until segmentsArray.length()) {
-                                        // Get the segment object at the current index
-                                        val segmentObject: JSONObject = segmentsArray.getJSONObject(i)
-
-                                        // Extract the properties from the segment object
-                                        val chapter: Int = segmentObject.getInt("Chapter")
-                                        val imageObject: JSONObject? = segmentObject.optJSONObject("Image")
-                                        val audioObject: JSONObject? = segmentObject.optJSONObject("Audio")
-                                        val videoObject: JSONObject? = segmentObject.optJSONObject("Video")
-
-                                        // Parse the image object if it exists
-                                        val image: Image? = imageObject?.let {
-                                            val source: String =
-                                                "${baseUrlForMedia}${data._id}/" + it.getString("Source")
-                                            val interval: Int = it.getInt("Interval")
-                                            Image(source, interval)
-                                        }
-
-                                        // Parse the audio object if it exists
-                                        val video: Video? = videoObject?.let {
-                                            val source: String =
-                                                "${baseUrlForMedia}${data._id}/" + it.getString("Source")
-                                            Video(source)
-                                        }
-
-                                        val audio: Audio? = audioObject?.let {
-                                            val source: String =
-                                                "${baseUrlForMedia}${data._id}/" + it.getString("Source")
-                                            Audio("suri", source)
-                                        }
-
-                                        val segment = Segment(chapter, image, video, audio)
-                                        segments.add(segment)
-                                    }
-
-                                    val videoJson = backgroundJson.optJSONObject("Video")
-                                    val audioJson = backgroundJson.optJSONObject("Audio")
-                                    val imageJson = backgroundJson.optJSONObject("Image")
-
-
-                                    try{
-                                        val videoSource: Video? = videoJson?.let {
-                                            val source: String =
-                                                "${baseUrlForMedia}${data._id}/" + it.getString("Source")
-                                            Video(source)
-                                        }
-
-                                        val audioSource: Audio? = audioJson?.let {
-                                            val source: String =
-                                                "${baseUrlForMedia}${data._id}/" + it.getString("Source")
-                                            Audio("suri", source)
-                                        }
-
-                                        val imageSource: Image? = imageJson?.let {
-                                            val source: String =
-                                                "${baseUrlForMedia}${data._id}/" + it.getString("Source")
-                                            val interval: Int = it.getInt("Interval")
-                                            Image(source, interval)
-                                        }
-
-
-                                        val background = Background(
-                                            video = videoSource,
-                                            audio = audioSource,
-                                            image = imageSource,
-                                            exoplayerUrlPosition = 0,
-                                            forNextUrlPosition = 0
-                                        )
-
-                                        if (data.liveStatus != "Disabled") {
-                                            var contentData = ContentData(
-                                                version = 1,
-                                                currentIndex = 0,
-                                                background = background,
-                                                segments = segments,
-                                                id = data._id,
-                                                title = data.title,
-                                                description = data.description,
-                                                thumbnail = baseUrlForImage + "" + data.thumbnail,
-                                                tagsData = data.tags,
-                                                callToAction = data.callToAction,
-                                                privateType = data.privateType
-                                            )
-                                            videos.add(contentData)
-                                        }
-                                    }
-                                    catch (e : Exception){}
-
-
-                                }
-                            }
-
-                            reloadVideosSize = videos.size
-
-                            preparePlayer(videos)
-
-                            viewPagerAdapter = VideoAdapter(this@MainActivity, viewPagerList, this@MainActivity)
-                            binding.viewPager.adapter = viewPagerAdapter
-                            binding.viewPager.setPageTransformer(ZoomOutPageTransformer())
-
-
-                            adapter = StatusAdapter(viewPagerList, adapterPosition, screenWidthDp)
-                            recyclerView?.adapter = adapter
-                            recyclerView?.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
-
-
-                            setupPageChangeCallback()
-
                         }
+
+                        reloadVideosSize = videos.size
+
+                        preparePlayer(videos)
+
+                        viewPagerAdapter = VideoAdapter(this@MainActivity, viewPagerList, this@MainActivity)
+                        binding.viewPager.adapter = viewPagerAdapter
+                        binding.viewPager.setPageTransformer(ZoomOutPageTransformer())
+
+                        if(videos.size > 0)
+                        {
+                            viewPagerAdapter?.updateTextValue(videos[adapterPosition].title.toString())
+                        }
+
+
+
+                        adapter = StatusAdapter(viewPagerList, adapterPosition, screenWidthDp)
+                        recyclerView?.adapter = adapter
+                        recyclerView?.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+
+
+                        setupPageChangeCallback()
+
+                    }
                 }
                 else
                 {
@@ -836,7 +843,14 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
 
-                loadNewPage(position)
+                if(position >= videos.size)
+                {
+                    binding.viewPager.currentItem = 0
+                }
+                else
+                {
+                    loadNewPage(position)
+                }
             }
 
             /**
@@ -922,7 +936,7 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
 
     private fun preparePlayer(videoUrls: ArrayList<ContentData>) {
 
-        val dataSourceFactory = DefaultDataSourceFactory(this, "your_user_agent")
+        val dataSourceFactory = DefaultDataSourceFactory(this, "your_user_agent${reloadApiCount}")
 
         for (currPosition in 0..(videoUrls.size - 1))
         {
@@ -933,7 +947,7 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
             {
                 firstVideo = 1
 
-                val mediaItem = MediaItem.fromUri("https://cmsbe.aideo.in/controllers/Content/uploads/65e6e8f0020854301254f7d1/1.mp4")
+                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/65e6e8f0020854301254f7d1/1.mp4")
                 val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
                 mediaSourceCantat?.addMediaSource(mediaSourceItem)
@@ -1018,21 +1032,25 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
             }
 
             override fun onPositionDiscontinuity(reason: Int) {
-                Log.d("onPositionDiscontinuit ", "${reason}")
 
-                if(reason == 0 && middleVideoPlaying == 1 && videos[adapterPosition].privateType == false)
+                if(reason == 0 && middleVideoPlaying == 1 && prepareNextVideo == 0)
                 {
+                    prepareNextVideo = 1
+
+                    Handler().postDelayed({
+                        prepareNextVideo = 0
+                    }, 1000)
+
                     showBackVideo.visibility = View.GONE
                     middleVideoPlaying = 0
 
-                    Log.d("surender kumar ", "${reason}")
+                    Log.d("surender kumar onPosi", "${reason}")
 
                     var model = videos[adapterPosition]
 
                     model.currentIndex++
 
                     adapter?.updateAdapter(model.currentIndex,0.0)
-
 
                     try {
                         if((videos[adapterPosition].segments!!.size ) == model.currentIndex)
@@ -1060,12 +1078,16 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
 
                     try {
                         if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
-                            showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                            showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos
+                                ,adapterPosition,
+                                videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                         }
                     } catch (e : Exception) {}
                 }
+
+
             }
-          }
+        }
         )
     }
 
@@ -1113,7 +1135,8 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
                     if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
                         showMiddleVideo(
                             videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
-                            adapterPosition
+                            adapterPosition,
+                            videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString()
                         )
                     }
                 } catch (e: Exception) {
@@ -1184,7 +1207,8 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
                         try{
                             if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
                             {
-                                showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                                showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition,
+                                    videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                             }
                         }
                         catch (e :Exception){}
@@ -1303,32 +1327,148 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
         catch (e : Exception){}
     }
 
-    fun showMiddleVideo(middleVideoPosition:Int,position: Int) {
+    fun showMiddleVideo(middleVideoPosition:Int,position: Int, videoUrlPre : String) {
         middleVideoPlaying = 1
 
-        if(videos.size > position)
+        if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.interval != null)
         {
-            if(videos[position].privateType == false) {
-                try {
-                    runOnUiThread {
-                        binding.imageView.visibility = View.GONE
-                        showBackVideo.visibility = View.VISIBLE
-                        player?.seekToDefaultPosition(middleVideoPosition)
-                        player?.playWhenReady = true
-                        player?.play()
-                    }
+           if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video!!.interval == 0.0)
+           {
+               val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                   override fun onDurationCalculated(duration: Long?) {
 
-                    try {
-                        val msec = MediaPlayer.create(
-                            this,
-                            Uri.parse(videos[position].segments?.get(videos[position].currentIndex)?.video?.source)
-                        ).duration
-                        currentInterval = msec.toDouble()
-                    } catch (e: Exception) {
+                       if (duration != null) {
+                           val durationSeconds = duration
+
+
+                           try {
+                               if(videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video?.interval != null)
+                               {
+                                   videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video!!.interval = durationSeconds.toDouble()
+                               }
+
+                                   if(videos[position].privateType == false) {
+                                       try {
+                                           runOnUiThread {
+                                               binding.imageView.visibility = View.GONE
+                                               showBackVideo.visibility = View.VISIBLE
+                                               player?.seekToDefaultPosition(middleVideoPosition)
+                                               player?.playWhenReady = true
+                                               player?.play()
+                                           }
+                                       } catch (e: Exception) {
+                                       }
+                               }
+                           }
+                           catch (e : Exception){}
+
+
+                           try {
+                               if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+                               {
+                                   nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+                               }
+                           }
+                           catch (e : Exception){}
+
+                       } else {
+                           println("Failed to retrieve video duration")
+                       }
+                   }
+
+                   override fun onError(error: Exception) {
+                       error.printStackTrace()
+                   }
+               })
+
+               durationCalculator.execute(videoUrlPre)
+           }
+            else
+           {
+               if(videos.size > position)
+               {
+                   if(videos[position].privateType == false) {
+                       try {
+                           runOnUiThread {
+                               binding.imageView.visibility = View.GONE
+                               showBackVideo.visibility = View.VISIBLE
+                               player?.seekToDefaultPosition(middleVideoPosition)
+                               player?.playWhenReady = true
+                               player?.play()
+                           }
+                       } catch (e: Exception) {
+                       }
+
+                       try {
+                           if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+                           {
+                               nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+                           }
+                       }
+                       catch (e : Exception){}
+                   }
+               }
+           }
+        }
+        else
+        {
+            val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                override fun onDurationCalculated(duration: Long?) {
+
+                    Log.d("start pickup duration " , "3 ${videoUrlPre}")
+
+                    if (duration != null) {
+                        val durationSeconds = duration
+
+                        Log.d("start pickup duration " , "4")
+
+                        try {
+                            if(videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video?.interval != null)
+                            {
+                                Log.d("start pickup duration " , "5")
+                                videos[adapterPosition].segments!![videos[adapterPosition].currentIndex].video!!.interval = durationSeconds.toDouble()
+                            }
+
+                            Log.d("start pickup duration " , "6")
+
+                            if(videos.size > position)
+                            {
+                                if(videos[position].privateType == false) {
+                                    try {
+                                        runOnUiThread {
+                                            binding.imageView.visibility = View.GONE
+                                            showBackVideo.visibility = View.VISIBLE
+                                            player?.seekToDefaultPosition(middleVideoPosition)
+                                            player?.playWhenReady = true
+                                            player?.play()
+                                        }
+                                    } catch (e: Exception) {
+                                    }
+                                }
+                            }
+                        }
+                        catch (e : Exception){}
+
+
+                        try {
+                            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+                            {
+                                nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+                            }
+                        }
+                        catch (e : Exception){}
+
+                    } else {
+                        println("Failed to retrieve video duration")
                     }
-                } catch (e: Exception) {
                 }
-            }
+
+                override fun onError(error: Exception) {
+                    error.printStackTrace()
+                }
+            })
+
+            durationCalculator.execute(videoUrlPre)
         }
     }
 
@@ -1368,6 +1508,14 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
         }
 
 
+        try {
+            if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source != null)
+            {
+                nextSegmentVideoDuration(videos[adapterPosition].currentIndex + 1, adapterPosition, videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex + 1)?.video?.source.toString())
+            }
+        }
+        catch (e : Exception){}
+
         countDownTimer = object : CountDownTimer(interval, interval) {
             override fun onTick(millisUntilFinished: Long) {
                 // This method is called every intervalInMillis (1 second in this case)
@@ -1402,7 +1550,8 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
 
                             if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
                             {
-                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos,adapterPosition,
+                                    videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                             }
 
                             if(videos[position].segments?.get(videos[position].currentIndex)?.audio?.source != null)
@@ -1430,6 +1579,7 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
         {
             countDownTimer!!.start()
         }
+
     }
 
     fun getMp3Duration(filePath: String): Long {
@@ -1472,27 +1622,65 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
             override fun run() {
                 // Call the method
 
-                try {
-                if(videos.size > adapterPosition) {
-                    if (videos[adapterPosition].privateType == false) {
+                if(middleVideoPlaying == 1 && player != null)
+                {
+                    Log.d("videos is suri","${middleVideoPlaying}")
 
-                        if (locationenabled == 1) {
-                            var dur = currentInterval / 100
+                    var model = videos[adapterPosition]
 
-                            try {
-                                var model = videos[adapterPosition]
+                    if(player!!.isPlaying)
+                    {
+                        try {
+                            if(videos.size > adapterPosition) {
 
-                                adapter?.updateProgress(
-                                    model.currentIndex,
-                                    (((screenWidthDp / videos[adapterPosition].segments!!.size) - 12) / dur)
-                                )
-                            } catch (e: Exception) {
+                                Log.d("videos is suri 1","${model.segments!![model.currentIndex].video!!.interval}")
+
+                                if (model.privateType == false && model.segments!![model.currentIndex].video!!.interval != 0.0) {
+
+                                    Log.d("videos is suri 2","${middleVideoPlaying}")
+
+                                    if (locationenabled == 1) {
+                                        var dur = model.segments!![model.currentIndex].video!!.interval / 100
+
+                                        try {
+                                            adapter?.updateProgress(
+                                                model.currentIndex,
+                                                (((screenWidthDp / model.segments!!.size) - 12) / dur)
+                                            )
+                                        } catch (e: Exception) {
+                                        }
+                                    }
+                                }
                             }
                         }
-                     }
-                   }
+                        catch (e : Exception){}
+                    }
                 }
-                catch (e : Exception){}
+                else
+                {
+                    try {
+                        if(videos.size > adapterPosition) {
+                            if (videos[adapterPosition].privateType == false) {
+
+                                if (locationenabled == 1) {
+                                    var dur = currentInterval / 100
+
+                                    try {
+                                        var model = videos[adapterPosition]
+
+                                        adapter?.updateProgress(
+                                            model.currentIndex,
+                                            (((screenWidthDp / videos[adapterPosition].segments!!.size) - 12) / dur)
+                                        )
+                                    } catch (e: Exception) {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (e : Exception){}
+                }
+
 
                 // Schedule the next call after the delay
                 handler.postDelayed(this, 100)
@@ -1718,7 +1906,8 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
                 try{
                     if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null)
                     {
-                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition)
+                        showMiddleVideo(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,adapterPosition,
+                            videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString())
                     }
                 }
                 catch (e : Exception){}
@@ -1783,7 +1972,8 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
                     if (videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source != null) {
                         showMiddleVideo(
                             videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)!!.exoPlayerUrlPos,
-                            adapterPosition
+                            adapterPosition,
+                            videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.source.toString()
                         )
                     }
                 } catch (e: Exception) {
@@ -1808,7 +1998,7 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
     fun loadNewPage(position: Int){
         if(isUpdateVidoes == 1) {
             isUpdateVidoes = 0
-                preparePlayer(videos)
+            preparePlayer(videos)
         }
 
         stopMiddlePlayback()
@@ -1856,7 +2046,6 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
 
                     if(isActivityOpened == 1)
                     {
-
                         videos[position].currentIndex = 0
                         middleVideoPlaying = 0
 
@@ -1938,7 +2127,8 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
                         try{
                             if(videos[position].segments?.get(videos[position].currentIndex)?.video?.source != null)
                             {
-                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos, position)
+                                showMiddleVideo(videos[position].segments?.get(videos[position].currentIndex)!!.exoPlayerUrlPos, position,
+                                    videos[position].segments?.get(videos[position].currentIndex)?.video?.source.toString())
                             }
                         }
                         catch (e :Exception){}
@@ -2032,6 +2222,17 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
 
         preloadNextAideoImage(position)
 
+        try
+        {
+            if(videos[position + 1].segments!![0].video?.source != null)
+            {
+                nextAideoSegmentDuration(0,position + 1, videos[position + 1].segments!![0].video?.source.toString())
+            }
+        }
+        catch (e : Exception){}
+
+
+
         if((videos.size - 2) <= position) {
             GlobalScope.launch(Dispatchers.IO)
             {
@@ -2091,5 +2292,133 @@ class MainActivity : AppCompatActivity() , ClickFunctionality {
             }
         }
         catch (e : Exception){}
+    }
+
+    fun nextAideoSegmentDuration(segmentPosition:Int,adapPosi: Int, videoUrlPre : String) {
+
+        var preModel = videos[adapPosi]
+
+        if(preModel.segments?.get(segmentPosition)?.video?.interval != null)
+        {
+            if(preModel.segments?.get(segmentPosition)?.video!!.interval == 0.0)
+            {
+                val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                    override fun onDurationCalculated(duration: Long?) {
+
+                        if (duration != null) {
+                            val durationSeconds = duration
+
+                            try {
+                                if(preModel.segments!![segmentPosition].video?.interval != null)
+                                {
+                                    preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                                }
+                            }
+                            catch (e : Exception){}
+
+                        } else {
+
+                        }
+                    }
+
+                    override fun onError(error: Exception) {
+                        error.printStackTrace()
+                    }
+                })
+
+                durationCalculator.execute(videoUrlPre)
+            }
+        }
+        else
+        {
+            val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                override fun onDurationCalculated(duration: Long?) {
+
+                    if (duration != null) {
+                        val durationSeconds = duration
+
+                        try {
+                            if(preModel.segments!![segmentPosition].video?.interval != null)
+                            {
+                                preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                            }
+                        }
+                        catch (e : Exception){}
+
+                    } else {
+                    }
+                }
+
+                override fun onError(error: Exception) {
+                    error.printStackTrace()
+                }
+            })
+
+            durationCalculator.execute(videoUrlPre)
+        }
+    }
+
+    fun nextSegmentVideoDuration(segmentPosition:Int,adapPosi: Int, videoUrlPre : String) {
+
+        var preModel = videos[adapPosi]
+
+        if(preModel.segments?.get(segmentPosition)?.video?.interval != null)
+        {
+            if(preModel.segments?.get(segmentPosition)?.video!!.interval == 0.0)
+            {
+                val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                    override fun onDurationCalculated(duration: Long?) {
+
+                        if (duration != null) {
+                            val durationSeconds = duration
+
+                            try {
+                                if(preModel.segments!![segmentPosition].video?.interval != null)
+                                {
+                                    preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                                }
+                            }
+                            catch (e : Exception){}
+
+                        } else {
+
+                        }
+                    }
+
+                    override fun onError(error: Exception) {
+                        error.printStackTrace()
+                    }
+                })
+
+                durationCalculator.execute(videoUrlPre)
+            }
+        }
+        else
+        {
+            val durationCalculator = VideoDurationCalculator(object : VideoDurationCalculator.OnVideoDurationListener {
+                override fun onDurationCalculated(duration: Long?) {
+
+                    if (duration != null) {
+                        val durationSeconds = duration
+
+                        try {
+                            if(preModel.segments!![segmentPosition].video?.interval != null)
+                            {
+                                preModel.segments!![segmentPosition].video!!.interval = durationSeconds.toDouble()
+                            }
+                        }
+                        catch (e : Exception){}
+
+                    } else {
+                    }
+                }
+
+                override fun onError(error: Exception) {
+                    error.printStackTrace()
+                }
+            })
+
+            durationCalculator.execute(videoUrlPre)
+        }
     }
 }

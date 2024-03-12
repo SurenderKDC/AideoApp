@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.aideo.app.ApiCalling.ContentData
 import com.aideo.app.R
+import com.aideo.app.VideoDurationCalculator
 import com.aideo.app.videos
 import java.util.ArrayList
 import kotlin.Exception
@@ -61,9 +62,20 @@ class StatusAdapter(var statusVideo: ArrayList<Int>,var adapterPosition : Int, p
     {
         currentPosition = position
         widthData = currentProgress
-        notifyItemChanged(position)
-        notifyItemChanged(position - 1)
-        notifyItemChanged(position + 1)
+        try {
+            notifyItemChanged(position)
+        }
+        catch (e : Exception){}
+
+        try {
+            notifyItemChanged(position - 1)
+        }
+        catch (e : Exception){}
+
+        try {
+            notifyItemChanged(position + 1)
+        }
+        catch (e : Exception){}
 
     }
 
@@ -73,7 +85,27 @@ class StatusAdapter(var statusVideo: ArrayList<Int>,var adapterPosition : Int, p
         currentPosition = position
         widthData += currentProgress
 
-        notifyItemChanged(position)
+        Log.d("current width sr", "${widthData}    ${((width / videos[adapterPosition].segments!!.size) - 14)}")
+
+        try {
+            notifyItemChanged(position)
+        }
+        catch (e : Exception){}
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
