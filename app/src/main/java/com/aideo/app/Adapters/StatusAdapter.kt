@@ -58,6 +58,7 @@ class StatusAdapter(var statusVideo: ArrayList<Int>,var adapterPosition : Int, p
         catch (e : Exception){}
     }
 
+
     fun updateAdapter(position : Int, currentProgress : Double)
     {
         currentPosition = position
@@ -85,7 +86,6 @@ class StatusAdapter(var statusVideo: ArrayList<Int>,var adapterPosition : Int, p
         currentPosition = position
         widthData += currentProgress
 
-        Log.d("current width sr", "${widthData}    ${((width / videos[adapterPosition].segments!!.size) - 14)}")
 
         try {
             notifyItemChanged(position)

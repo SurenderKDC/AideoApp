@@ -8,5 +8,4 @@ pluginManagement {
 
 rootProject.name = "viewpager2withexoplayer"
 include ':app'
-include ':library'
-include ':photoeditor'
+

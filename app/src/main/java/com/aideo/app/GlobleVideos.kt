@@ -8,6 +8,5 @@ var currentCityName : String = ""
 
 var reloadApiCount = 1
 
-
 class GlobleVideos {
 }

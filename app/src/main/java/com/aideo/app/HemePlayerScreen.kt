@@ -310,7 +310,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
         videos.clear()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
+            .baseUrl("https://cmsbe.aideo.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -439,7 +439,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
+            .baseUrl("https://cmsbe.aideo.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -647,7 +647,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
+            .baseUrl("https://cmsbe.aideo.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -873,7 +873,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
 
     fun callLogsApi(contentId : String, city : String, tagIds : List<String>, watchDuration : String) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
+            .baseUrl("https://cmsbe.aideo.in/api/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -920,7 +920,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             {
                 firstVideo = 1
 
-                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/65e6e8f0020854301254f7d1/1.mp4")
+                val mediaItem = MediaItem.fromUri("https://cmsbe.aideo.in/controllers/Content/uploads/65e6e8f0020854301254f7d1/1.mp4")
                 val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
                 mediaSourceCantat?.addMediaSource(mediaSourceItem)
@@ -1316,6 +1316,8 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
     fun showMiddleVideo(middleVideoPosition:Int,position: Int, videoUrlPre : String) {
         middleVideoPlaying = 1
 
+        Log.d("meddle video int", "${videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.interval}")
+
         if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video?.interval != null)
         {
             if(videos[adapterPosition].segments?.get(videos[adapterPosition].currentIndex)?.video!!.interval == 0.0)
@@ -1592,22 +1594,18 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             override fun run() {
                 // Call the method
 
+                Log.d("video progress status", "middleVideoPlaying = ${middleVideoPlaying} , player = ${player}")
+
                 if(middleVideoPlaying == 1 && player != null)
                 {
-                    Log.d("videos is suri","${middleVideoPlaying}")
-
-                    var model = videos[adapterPosition]
-
                     if(player!!.isPlaying)
                     {
                         try {
                             if(videos.size > adapterPosition) {
-
-                                Log.d("videos is suri 1","${model.segments!![model.currentIndex].video!!.interval}")
+                                var model = videos[adapterPosition]
 
                                 if (model.privateType == false && model.segments!![model.currentIndex].video!!.interval != 0.0) {
 
-                                    Log.d("videos is suri 2","${middleVideoPlaying}")
 
                                     if (locationenabled == 1) {
                                         var dur = model.segments!![model.currentIndex].video!!.interval / 100
@@ -1712,7 +1710,7 @@ class HemePlayerScreen : AppCompatActivity() , ClickFunctionality {
             imageFile
         )
 
-        val shareBody = "https://aideobe.kdcstaging.in/share/$videoId"
+        val shareBody = "https://cmsbe.aideo.in/share/$videoId"
 
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
