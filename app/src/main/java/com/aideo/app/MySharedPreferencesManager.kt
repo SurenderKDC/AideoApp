@@ -131,8 +131,8 @@ class MySharedPreferencesManager(context: Context) {
 //import java.util.Locale
 //import java.util.concurrent.TimeUnit
 //
-//val baseUrlForMedia : String = "https://aideobe.kdcstaging.in/controllers/Content/uploads/"
-//val baseUrlForImage : String = "https://aideobe.kdcstaging.in/"
+//val baseUrlForMedia : String = "https://cmsbe.aideo.in/controllers/Content/uploads/"
+//val baseUrlForImage : String = "https://cmsbe.aideo.in/"
 //var GlobleSplash = 1
 //
 //class MainActivity : AppCompatActivity() , ClickFunctionality {
@@ -449,7 +449,7 @@ class MySharedPreferencesManager(context: Context) {
 //            .build()
 //
 //        val retrofit = Retrofit.Builder()
-//            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
+//            .baseUrl("https://cmsbe.aideo.in/api/v1/")
 //            .addConverterFactory(GsonConverterFactory.create())
 //            .client(okHttpClient)
 //            .build()
@@ -574,7 +574,7 @@ class MySharedPreferencesManager(context: Context) {
 //
 //
 //        val retrofit = Retrofit.Builder()
-//            .baseUrl("https://aideobe.kdcstaging.in/api/v1/")
+//            .baseUrl("https://cmsbe.aideo.in/api/v1/")
 //            .addConverterFactory(GsonConverterFactory.create())
 //            .client(okHttpClient)
 //            .build()
@@ -768,7 +768,7 @@ class MySharedPreferencesManager(context: Context) {
 //            if(firstVideo == 0 && videoUrl.background?.video?.source == null)
 //            {
 //                firstVideo = 1
-//                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/64c4eec976feff29b693a7c5/1.mp4")
+//                val mediaItem = MediaItem.fromUri("https://cmsbe.aideo.in/controllers/Content/uploads/64c4eec976feff29b693a7c5/1.mp4")
 //                val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
 //                    .createMediaSource(mediaItem)
 //                mediaSourceCantat?.addMediaSource(mediaSourceItem)
@@ -898,7 +898,7 @@ class MySharedPreferencesManager(context: Context) {
 //            if(firstVideo == 0 && videoUrl.background?.video?.source == null)
 //            {
 //                firstVideo = 1
-//                val mediaItem = MediaItem.fromUri("https://aideobe.kdcstaging.in/controllers/Content/uploads/64a93158013061b463045fd3/ShopQuote1.mp4")
+//                val mediaItem = MediaItem.fromUri("https://cmsbe.aideo.in/controllers/Content/uploads/64a93158013061b463045fd3/ShopQuote1.mp4")
 //                val mediaSourceItem = ProgressiveMediaSource.Factory(dataSourceFactory)
 //                    .createMediaSource(mediaItem)
 //                mediaSourceCantat?.addMediaSource(mediaSourceItem)

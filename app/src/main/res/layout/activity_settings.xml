@@ -82,7 +82,7 @@
         android:textColor="#ADADAD"
         android:textSize="12dp"
         android:textFontWeight="400"
-        android:text="App Version: 11.0"
+        android:text="App Version: 13.0"
         android:layout_marginLeft="20dp"
         android:layout_width="match_parent"
         android:layout_height="40dp"/>
